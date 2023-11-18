@@ -1,0 +1,48 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.button-top,
+.button-center,
+.button-bottom {
+  justify-content: center;
+  align-items: center;
+  margin: 8px 0;
+}
+
+button {
+  width: 110px;
+  height: 70px;
+  padding: 12px;
+  font-size: 16px;
+  text-align: center;
+  background-color: #5da9e9; /* Màu xanh nhạt */
+  margin: 12px 12px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.3s;
+}
+
+.button-center .stop {
+  background-color: #e74c3c; /* Màu đỏ cho nút stop */
+}
+
+.bottom {
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+}
+
+button:hover {
+  background-color: #4682b4; /* Màu xanh nhạt khi di chuột qua */
+  transform: scale(1.05);
+}
