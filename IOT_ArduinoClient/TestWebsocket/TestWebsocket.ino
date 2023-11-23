@@ -6,7 +6,7 @@
 
 const char *ssid = "Cin";
 const char *password = "23122002";
-const char *host = "192.168.1.111";
+const char *host = "192.168.1.3";
 const int port = 8080;
 
 WebSocketsClient webSocket;
@@ -35,6 +35,9 @@ const int servoPin = 13;
 Ultrasonic ultrasonic(trigPin, echoPin);
 
 bool autoMode = false;
+bool moveForwardMode = false;
+bool moveBackMode = false;
+
 
 void setup() {
   Serial.begin(115200);
@@ -128,8 +131,18 @@ void moveForward() {
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
-  analogWrite(ENA, 255);
-  analogWrite(ENB, 255);
+  analogWrite(ENA, 150);
+  analogWrite(ENB, 150);
+  // Serial.println("Moving forward...");
+}
+
+void moveForwardAuto() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 100);
+  analogWrite(ENB, 100);
   // Serial.println("Moving forward...");
 }
 
@@ -139,8 +152,8 @@ void moveBack() {
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  analogWrite(ENA, 255);
-  analogWrite(ENB, 255);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
   // Serial.println("Moving back...");
 }
 
@@ -150,8 +163,8 @@ void moveRight() {
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
-  analogWrite(ENA, 255);
-  analogWrite(ENB, 255);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
   // Serial.println("Moving Right...");
 }
 
@@ -161,8 +174,8 @@ void moveLeft() {
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  analogWrite(ENA, 255);
-  analogWrite(ENB, 255);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
   // Serial.println("Moving left...");
 }
 
@@ -212,6 +225,14 @@ void loop() {
   if (autoMode) {
     handleAutoMode();
   }
+
+  if (moveForwardMode) {
+    moveForward();
+  }
+
+  if (moveBackMode) {
+    moveBack();
+  }
 }
 
 void webSocketEventDistance(WStype_t type, uint8_t *payload, size_t length) {
@@ -241,33 +262,23 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
         Serial.println(receivedText);
 
         if (receivedText.equals("forward")) {
-          stopMoving();
-          moveForward();
-          sendDistance();
-          delay(3000);
-          stopMoving();
+          moveForwardMode = true;
         } else if (receivedText.equals("auto")) {
           autoMode = true;
         } else if (receivedText.equals("left")) {
-          stopMoving();
           moveLeft();
-          sendDistance();
-          delay(3000);
+          delay(200);
           stopMoving();
         } else if (receivedText.equals("right")) {
-          stopMoving();
           moveRight();
-          sendDistance();
-          delay(3000);
+          delay(200);
           stopMoving();
         } else if (receivedText.equals("back")) {
-          stopMoving();
-          moveBack();
-          sendDistance();
-          delay(3000);
-          stopMoving();
+          moveBackMode = true;
         } else if (receivedText.equals("stop")) {
           autoMode = false;
+          moveBackMode = false;
+          moveForwardMode = false;
           stopMoving();
         }
       }
@@ -281,19 +292,17 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 // Extracted the auto mode logic to a separate function
 void handleAutoMode() {
   int distance = ultrasonic.read();
-  sendDistance();
   int distance_right;
   int distance_left;
 
-  if (distance > 50 || distance == 0) {
-    moveForward();
+  if (distance > 40 || distance == 0) {
+    moveForwardAuto();
   } else {
     stopMoving();
     delay(300);
     moveBack();
-    delay(400);
+    delay(200);
     stopMoving();
-    delay(300);
 
     myservo.write(90);
     delay(500);
@@ -310,32 +319,32 @@ void handleAutoMode() {
     myservo.write(90);
     delay(500);
 
-    if (distance_left < 40 && distance_right < 40) {
+    if (distance_left < 30 && distance_right < 30) {
       moveBack();
-      delay(400);
+      delay(300);
       stopMoving();
       delay(300);
       moveLeft();
-      delay(500);
+      delay(200);
       stopMoving();
       delay(300);
     } else {
       if (distance_left > distance_right) {
         moveBack();
-        delay(400);
+        delay(300);
         stopMoving();
         delay(300);
         moveLeft();
-        delay(600);
+        delay(200);
         stopMoving();
         delay(300);
       } else {
         moveBack();
-        delay(400);
+        delay(300);
         stopMoving();
         delay(300);
         moveRight();
-        delay(600);
+        delay(200);
         stopMoving();
         delay(300);
       }

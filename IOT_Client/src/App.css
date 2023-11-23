@@ -36,13 +36,18 @@ button {
   background-color: #e74c3c; /* Màu đỏ cho nút stop */
 }
 
-.bottom {
+.bottom_left {
   position: fixed;
   bottom: 0px;
-  right: 0px;
+  left: 0;
 }
 
-button:hover {
-  background-color: #4682b4; /* Màu xanh nhạt khi di chuột qua */
-  transform: scale(1.05);
+.bottom_left .stop {
+  background-color: #e74c3c; /* Màu đỏ cho nút stop */
+}
+
+.bottom_right {
+  position: fixed;
+  bottom: 0px;
+  right: 0;
 }
