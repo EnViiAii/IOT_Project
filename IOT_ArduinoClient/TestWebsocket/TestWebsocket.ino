@@ -4,9 +4,9 @@
 #include <WebSocketsClient.h>
 #include <ESP32Servo.h>
 
-const char *ssid = "Cin";
-const char *password = "23122002";
-const char *host = "192.168.1.3";
+const char *ssid = "EnViiAiii";
+const char *password = "01234567";
+const char *host = "172.20.10.4";
 const int port = 8080;
 
 WebSocketsClient webSocket;
@@ -141,12 +141,11 @@ void moveForwardAuto() {
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
-  analogWrite(ENA, 100);
-  analogWrite(ENB, 100);
+  analogWrite(ENA, 50);
+  analogWrite(ENB, 50);
   // Serial.println("Moving forward...");
 }
 
-// Chức năng di chuyển xe về phía sau
 void moveBack() {
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
@@ -154,6 +153,17 @@ void moveBack() {
   digitalWrite(IN4, HIGH);
   analogWrite(ENA, 150);
   analogWrite(ENB, 150);
+  // Serial.println("Moving back...");
+}
+
+// Chức năng di chuyển xe về phía sau
+void moveBackAuto() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 90);
+  analogWrite(ENB, 90);
   // Serial.println("Moving back...");
 }
 
@@ -262,9 +272,17 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
         Serial.println(receivedText);
 
         if (receivedText.equals("forward")) {
+          stopMoving();
+          myservo.write(90);
+          autoMode = false;
+          moveBackMode = false;
           moveForwardMode = true;
         } else if (receivedText.equals("auto")) {
+          stopMoving();
+          myservo.write(90);
           autoMode = true;
+          moveBackMode = false;
+          moveForwardMode = false;
         } else if (receivedText.equals("left")) {
           moveLeft();
           delay(200);
@@ -274,7 +292,11 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
           delay(200);
           stopMoving();
         } else if (receivedText.equals("back")) {
+          stopMoving();
+          myservo.write(90);
+          autoMode = false;
           moveBackMode = true;
+          moveForwardMode = false;
         } else if (receivedText.equals("stop")) {
           autoMode = false;
           moveBackMode = false;
@@ -292,18 +314,18 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 // Extracted the auto mode logic to a separate function
 void handleAutoMode() {
   int distance = ultrasonic.read();
+  sendDistance();
   int distance_right;
   int distance_left;
 
-  if (distance > 30 || distance == 0) {
-    moveForwardAuto();
+  if (distance > 50 || distance == 0) {
+    moveForward();
   } else {
     stopMoving();
     delay(300);
-    moveBack();
-    delay(200);
+    moveBackAuto();
+    delay(250);
     stopMoving();
-
     myservo.write(90);
     delay(500);
     myservo.write(150);
@@ -319,9 +341,9 @@ void handleAutoMode() {
     myservo.write(90);
     delay(500);
 
-    if (distance_left < 20 && distance_right < 20) {
-      moveBack();
-      delay(300);
+    if (distance_left < 40 && distance_right < 40) {
+      moveBackAuto();
+      delay(400);
       stopMoving();
       delay(300);
       moveLeft();
@@ -330,8 +352,8 @@ void handleAutoMode() {
       delay(300);
     } else {
       if (distance_left > distance_right) {
-        moveBack();
-        delay(300);
+        moveBackAuto();
+        delay(400);
         stopMoving();
         delay(300);
         moveLeft();
@@ -339,8 +361,8 @@ void handleAutoMode() {
         stopMoving();
         delay(300);
       } else {
-        moveBack();
-        delay(300);
+        moveBackAuto();
+        delay(400);
         stopMoving();
         delay(300);
         moveRight();
