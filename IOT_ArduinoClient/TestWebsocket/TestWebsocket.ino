@@ -152,8 +152,8 @@ void moveBack() {
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  analogWrite(ENA, 200);
-  analogWrite(ENB, 200);
+  analogWrite(ENA, 150);
+  analogWrite(ENB, 150);
   // Serial.println("Moving back...");
 }
 
@@ -295,7 +295,7 @@ void handleAutoMode() {
   int distance_right;
   int distance_left;
 
-  if (distance > 40 || distance == 0) {
+  if (distance > 30 || distance == 0) {
     moveForwardAuto();
   } else {
     stopMoving();
@@ -319,7 +319,7 @@ void handleAutoMode() {
     myservo.write(90);
     delay(500);
 
-    if (distance_left < 30 && distance_right < 30) {
+    if (distance_left < 20 && distance_right < 20) {
       moveBack();
       delay(300);
       stopMoving();
