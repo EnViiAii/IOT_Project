@@ -11,10 +11,9 @@
   border: #333 2px solid;
 }
 
-p {
+p .voice {
   color: white;
   font-size: 24px;
-  font-family: "Courier New", Courier, monospace;
 }
 
 .voiceChat {

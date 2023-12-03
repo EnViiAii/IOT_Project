@@ -35,7 +35,7 @@ const Voice = ({ onTranscript }) => {
 
   return (
     <div className="voice-container">
-      <p>{check}</p>
+      <p className="voice">{check}</p>
       <button className="voiceChat" onClick={handleSpeech}>
         {listening ? "Stop" : "Start"}
       </button>

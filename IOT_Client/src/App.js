@@ -11,8 +11,7 @@ const App = () => {
   const [showVoice, setShowVoice] = useState(false);
 
   useEffect(() => {
-    // const newWebSocket = new WebSocket('ws://localhost:8080/toClient');
-    const newWebSocket = new WebSocket('ws://192.168.1.3:8080/toClient');
+    const newWebSocket = new WebSocket('ws://172.20.10.2:8080/toClient');
 
     newWebSocket.onopen = () => {
       console.log('Connected to WebSocket server for ESP32');

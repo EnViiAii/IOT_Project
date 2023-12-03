@@ -1,14 +1,12 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <Ultrasonic.h>
 #include <WebSocketsClient.h>
 #include <ESP32Servo.h>
 
 const char *ssid = "EnViiAiii";
 const char *password = "01234567";
-const char *host = "172.20.10.4";
+const char *host = "172.20.10.2";
 const int port = 8080;
-
 WebSocketsClient webSocket;
 WebSocketsClient webSocketDistance;
 Servo myservo; 
@@ -31,8 +29,6 @@ const int echoPin = 27;
 // Thiết lập GPIO cho Servo
 const int servoPin = 13;
 
-// Đối tượng Ultrasonic
-Ultrasonic ultrasonic(trigPin, echoPin);
 
 bool autoMode = false;
 bool moveForwardMode = false;
@@ -124,7 +120,6 @@ bool connectToSocketIO() {
   }
 }
 
-
 // Chức năng di chuyển xe về phía trước
 void moveForward() {
   digitalWrite(IN1, LOW);
@@ -162,8 +157,8 @@ void moveBackAuto() {
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  analogWrite(ENA, 90);
-  analogWrite(ENB, 90);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
   // Serial.println("Moving back...");
 }
 
@@ -219,11 +214,25 @@ void scanByServoRight() {
 
 void sendDistance() {
   if (webSocketDistance.isConnected()) {
-    int distance = ultrasonic.read();
+    int distance = measureDistance();
     String messageToSend = String(distance);
     webSocketDistance.sendTXT(messageToSend);
     delay(100);
   }
+}
+
+long measureDistance() {
+  long duration, distance;
+
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  duration = pulseIn(echoPin, HIGH);
+
+  distance = duration * 0.034 / 2;
+
+  return distance;
 }
 
 
@@ -285,11 +294,11 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
           moveForwardMode = false;
         } else if (receivedText.equals("left")) {
           moveLeft();
-          delay(200);
+          delay(350);
           stopMoving();
         } else if (receivedText.equals("right")) {
           moveRight();
-          delay(200);
+          delay(350);
           stopMoving();
         } else if (receivedText.equals("back")) {
           stopMoving();
@@ -313,41 +322,39 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 
 // Extracted the auto mode logic to a separate function
 void handleAutoMode() {
-  int distance = ultrasonic.read();
-  sendDistance();
-  int distance_right;
-  int distance_left;
+  long distance = measureDistance();
+  long distance_right;
+  long distance_left;
 
-  if (distance > 50 || distance == 0) {
+  if (distance > 40 || distance == 0) {
     moveForward();
   } else {
     stopMoving();
     delay(300);
     moveBackAuto();
-    delay(250);
+    delay(300);
     stopMoving();
     myservo.write(90);
     delay(500);
     myservo.write(150);
     delay(500);
-    distance_left = ultrasonic.read();
+    distance_left = measureDistance();
     delay(100);
     myservo.write(90);
     delay(500);
     myservo.write(30);
     delay(500);
-    distance_right = ultrasonic.read();
+    distance_right = measureDistance();
     delay(100);
     myservo.write(90);
     delay(500);
-
-    if (distance_left < 40 && distance_right < 40) {
+    if (distance_left < 30 && distance_right < 30) {
       moveBackAuto();
       delay(400);
       stopMoving();
       delay(300);
       moveLeft();
-      delay(200);
+      delay(300);
       stopMoving();
       delay(300);
     } else {
@@ -357,7 +364,7 @@ void handleAutoMode() {
         stopMoving();
         delay(300);
         moveLeft();
-        delay(200);
+        delay(300);
         stopMoving();
         delay(300);
       } else {
@@ -366,7 +373,7 @@ void handleAutoMode() {
         stopMoving();
         delay(300);
         moveRight();
-        delay(200);
+        delay(300);
         stopMoving();
         delay(300);
       }
